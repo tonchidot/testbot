@@ -57,7 +57,7 @@ module Testbot::Runner
       }
 
       SSHTunnel.new(@config.server_host, @config.server_user || Testbot::DEFAULT_USER).open if @config.ssh_tunnel
-      while true
+#      while true
         begin
           update_uid!
           start_ping
@@ -66,7 +66,7 @@ module Testbot::Runner
           break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
           puts "The runner crashed, restarting. Error: #{ex.inspect} #{ex.class}"
         end
-      end
+#      end
     end
 
     private
