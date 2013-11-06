@@ -96,6 +96,8 @@ module Testbot::Server
   end
 
   get '/status/:dir/:file' do
+    content_type :js if params[:file] =~ /\.js$/
+
     File.read(File.join(File.dirname(__FILE__), "/status/#{params[:dir]}/#{params[:file]}"))
   end
 
