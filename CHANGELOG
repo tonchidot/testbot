@@ -1,3 +1,29 @@
+0.7.8
+
+Fix test job bug that caused multiple jobs to use the same TEST_ENV_NUMBER.
+
+This caused multiple processes to use the same databases, etc.
+
+If you're seeing database deadlocks in tests, this will probably fix that.
+
+0.7.7
+
+Exit when file syncing fails so that you don't run tests for a version of the
+code you did not expect.
+
+0.7.5
+
+Fixed bug where a runner updating without a result would fail.
+
+Also dropping official support for 1.8 as it's such a hassle to maintain.
+
+0.7.3
+
+Increased time between updates to avoid timeouts. Allow timeout when posting
+incremental build results (but not when posting the final results).
+
+Should make testbot more stable for some people.
+
 0.7.2
 
 Increased timeout on http requests to the server to 10 seconds.

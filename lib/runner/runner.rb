@@ -108,9 +108,13 @@ module Testbot::Runner
         end
 
         @last_build_id = job.build_id
+
+        # Must be outside the thread or it will sometimes run
+        # multiple jobs using the same instance number.
         instance_number = free_instance_number
-        @instances << [ Thread.new { job.run(instance_number) },
-          instance_number, job ]
+
+        @instances << [ Thread.new { job.run(instance_number) }, instance_number, job ]
+
         loop do
           clear_completed_instances
           break unless max_instances_running?
