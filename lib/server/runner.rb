@@ -18,7 +18,7 @@ module Testbot::Server
     end
 
     def self.timeout
-      10
+      30
     end
 
     def self.find_by_uid(uid)
