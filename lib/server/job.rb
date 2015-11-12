@@ -54,6 +54,7 @@ module Testbot::Server
 
     def self.release_jobs_taken_by_missing_runners!
       missing_runners = Runner.all.find_all { |r| r.last_seen_at < (Time.now - Runner.timeout) }
+      puts "!!! releasing jobs for missing runner(s): #{ missing_runners.map(&:hostname).join(", ") }" if missing_runners.count > 0
       missing_runners.each { |runner|
         Job.all.find_all { |job| job.taken_by == runner }.each { |job| job.update(:taken_at => nil) }
       }
