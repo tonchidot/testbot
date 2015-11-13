@@ -5,7 +5,7 @@ PATH
       acts_as_rails3_generator
       daemons (>= 1.0.10)
       httparty (>= 0.6.1)
-      iconv (= 1.0.3)
+      iconv (~> 1.0.0)
       json_pure (>= 1.4.6)
       net-ssh (>= 2.0.23, < 3.0.0)
       posix-spawn (>= 0.3.6)
