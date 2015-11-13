@@ -14,13 +14,14 @@ Gem::Specification.new do |s|
   s.files       = Dir.glob("lib/**/*") + Dir.glob("test/**/*") + %w(Gemfile .gemtest Rakefile testbot.gemspec CHANGELOG README.markdown bin/testbot) +
                   (File.exists?("DEV_VERSION") ? [ "DEV_VERSION" ] : [])
 
-  s.add_dependency('sinatra', '>= 1.0.0')
+  s.add_dependency('sinatra', '~> 1.0', '< 1.4.0')
   s.add_dependency('httparty', '>= 0.6.1')
-  s.add_dependency('net-ssh', '>= 2.0.23')
+  s.add_dependency('net-ssh', '>= 2.0.23', '< 3.0.0')
   s.add_dependency('json_pure', '>= 1.4.6')
   s.add_dependency('daemons', '>= 1.0.10')
   s.add_dependency('acts_as_rails3_generator')
   s.add_dependency('posix-spawn', '>= 0.3.6')
+  s.add_dependency('iconv', '1.0.3')
 
   s.add_development_dependency("shoulda")
   s.add_development_dependency("rack-test")
