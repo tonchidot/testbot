@@ -236,6 +236,7 @@ module Testbot::Server
       end
 
       should "return taken jobs to other runners if the runner hasn't been seen for 10 seconds or more" do
+        flexmock(Runner).should_receive(:timeout).and_return(10)
         missing_runner = Runner.create(:last_seen_at => Time.now - 15)
         build = Build.create
         old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build, :taken_by => missing_runner, :taken_at => Time.now - 30, :project => 'things'
@@ -284,6 +285,7 @@ module Testbot::Server
       end
 
       should "not return runners as available when not seen the last 10 seconds" do
+        flexmock(Runner).should_receive(:timeout).and_return(10)
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => "user1"
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)      
@@ -304,6 +306,7 @@ module Testbot::Server
       end    
 
       should "not return instances as available when not seen the last 10 seconds" do
+        flexmock(Runner).should_receive(:timeout).and_return(10)
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
@@ -325,6 +328,7 @@ module Testbot::Server
       end    
 
       should "not return instances as available when not seen the last 10 seconds" do
+        flexmock(Runner).should_receive(:timeout).and_return(10)
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2, :idle_instances => 1
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4, :idle_instances => 2
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
@@ -475,6 +479,7 @@ module Testbot::Server
       end
 
       should "not return instances when not seen the last 10 seconds" do
+        flexmock(Runner).should_receive(:timeout).and_return(10)
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)

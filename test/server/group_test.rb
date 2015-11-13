@@ -10,6 +10,7 @@ module Testbot::Server
     context "self.build" do
 
       should "create file groups based on the number of instances" do
+        flexmock(Group).should_receive(:initial_allocate_ratio).and_return(1.0)
         groups = Group.build([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
                              'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], [ 1, 1, 1, 1 ], 2, 'spec')
 
@@ -18,7 +19,16 @@ module Testbot::Server
         assert_equal [ 'spec/models/car2_spec.rb', 'spec/models/car_spec.rb' ], groups[1]
       end
 
-      should "create a small grop when there isn't enough specs to fill a normal one" do
+      should "create file groups based on the number of instances / initial_allocate_ratio" do
+        flexmock(Group).should_receive(:initial_allocate_ratio).and_return(0.5)
+        groups = Group.build([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
+                             'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], [ 1, 1, 1, 1 ], 2, 'spec')
+
+        assert_equal 4, groups.size
+      end
+
+      should "create a small group when there isn't enough specs to fill a normal one" do
+        flexmock(Group).should_receive(:initial_allocate_ratio).and_return(1.0)
         groups = Group.build(["spec/models/car_spec.rb", "spec/models/car2_spec.rb",   
                              "spec/models/house_spec.rb", "spec/models/house2_spec.rb",
                              "spec/models/house3_spec.rb"], [ 1, 1, 1, 1, 1 ], 3, 'spec')
@@ -28,6 +38,7 @@ module Testbot::Server
       end
 
       should "use sizes when building groups" do
+        flexmock(Group).should_receive(:initial_allocate_ratio).and_return(1.0)
         groups = Group.build([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
                              'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], [ 40, 10, 10, 20 ], 2, 'spec')
 
