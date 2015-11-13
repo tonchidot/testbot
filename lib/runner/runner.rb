@@ -103,8 +103,8 @@ module Testbot::Runner
 
         job = Job.new(*([ self, next_job.split(',') ].flatten))
         if first_job_from_build?
-          fetch_code(job)
-          before_run(job)
+          job.fetch_code
+          job.before_run @config.max_instances
         end
 
         @last_build_id = job.build_id
@@ -125,25 +125,6 @@ module Testbot::Runner
     def max_jruby_instances?
       return unless @config.max_jruby_instances
       @instances.find_all { |thread, n, job| job.jruby? }.size >= @config.max_jruby_instances
-    end
-
-    def fetch_code(job)
-      system "rsync -az --timeout=300 --delete --delete-excluded -e ssh #{job.root}/ #{job.project}"
-    end
-
-    def before_run(job)
-      rvm_prefix = RubyEnv.rvm_prefix(job.project)
-      bundler_cmd = (RubyEnv.bundler?(job.project) ? [rvm_prefix, "bundle &&", rvm_prefix, "bundle exec"] : [rvm_prefix]).compact.join(" ")
-      command_prefix = "cd #{job.project} && export RAILS_ENV=test && export TEST_INSTANCES=#{@config.max_instances} && #{bundler_cmd}"
-
-      if File.exists?("#{job.project}/lib/tasks/testbot.rake")
-        system "#{command_prefix} rake testbot:before_run"
-      elsif File.exists?("#{job.project}/config/testbot/before_run.rb")
-        system "#{command_prefix} ruby config/testbot/before_run.rb"
-      else
-        # workaround to bundle within the correct env
-        system "#{command_prefix} ruby -e ''"
-      end
     end
 
     def first_job_from_build?

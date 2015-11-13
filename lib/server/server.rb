@@ -21,6 +21,16 @@ module Testbot::Server
     def self.valid_version?(runner_version)
       Testbot.version == runner_version
     end
+
+    def self.runner_attributes runner
+      runner.attributes
+        .merge(build: nil)
+        .merge(status: status_for_runner(runner))
+    end
+
+    def self.status_for_runner runner
+      Job.all.find_all { |job| job.taken_by == runner }.map { |job| job.status }.join("/")
+    end
   end
 
   post '/builds' do
@@ -68,7 +78,7 @@ module Testbot::Server
   end
 
   get '/runners' do
-    Runner.find_all_available.map { |r| r.attributes }.to_json
+    Runner.find_all_available.map { |r| Server.runner_attributes r }.to_json
   end
 
   get '/runners/outdated' do
