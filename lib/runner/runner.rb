@@ -65,6 +65,8 @@ module Testbot::Runner
         rescue Exception => ex
 #          break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
           puts "The runner crashed, restarting. Error: #{ex.inspect} #{ex.class}"
+          puts "Caller: "
+          puts ex.backtrace.join("\n")
         end
 #      end
     end
@@ -98,6 +100,7 @@ module Testbot::Runner
         clear_completed_instances 
 
         next_job = Server.get("/jobs/next", :query => next_params) rescue nil
+        raise "fetch next job failed. response: #{next_job}" if next_job && next_job.code != 200
         last_check_found_a_job = (next_job != nil && next_job.body != "")
         next unless last_check_found_a_job
 

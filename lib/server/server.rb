@@ -42,6 +42,7 @@ module Testbot::Server
   end
 
   get '/builds/:id' do
+    Job.release_jobs_taken_by_missing_runners!
     build = Build.find(params[:id])
     build.destroy if build.done
     { "done" => build.done, "results" => build.results, "success" => build.success }.to_json
@@ -54,10 +55,11 @@ module Testbot::Server
   end
 
   get '/jobs/next' do
-    next_job, runner = Job.next(params, @env['REMOTE_ADDR'])
-    if next_job
-      next_job.update(:taken_at => Time.now, :taken_by => runner)
-      [ next_job.id, next_job.build.id, next_job.project, next_job.root, next_job.type, (next_job.jruby == 1 ? 'jruby' : 'ruby'), next_job.files ].join(',')
+    job, runner = Job.next(params, @env['REMOTE_ADDR'])
+    if job
+      job.update(:taken_at => Time.now, :taken_by => runner)
+      job.build.logln "job##{job.id} assigned to runner<#{runner.hostname}>. unassigned jobs:#{job.build.remaining_jobs.count}/#{job.build.all_jobs.count} done jobs:#{job.build.done_jobs.count}/#{job.build.all_jobs.count} "
+      [ job.id, job.build.id, job.project, job.root, job.type, (job.jruby == 1 ? 'jruby' : 'ruby'), job.files ].join(',')
     end
   end
 

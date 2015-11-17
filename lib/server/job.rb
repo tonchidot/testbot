@@ -42,21 +42,28 @@ module Testbot::Server
     end
 
     def self.next_job(build_id, no_jruby)
+      jobs = remaining_jobs(build_id, no_jruby)
+      jobs[rand(jobs.size)]
+    end
+
+    def self.remaining_jobs(build_id, no_jruby=nil)
       release_jobs_taken_by_missing_runners!
-      jobs = Job.all.find_all { |j|
+      Job.all.find_all { |j|
         !j.taken_at &&
-          (build_id ? j.build.id.to_s == build_id : true) &&
+          (build_id ? j.build.id.to_s == build_id.to_s : true) &&
           (no_jruby ? j.jruby != 1 : true)
       }
-
-      jobs[rand(jobs.size)]
     end
 
     def self.release_jobs_taken_by_missing_runners!
       missing_runners = Runner.all.find_all { |r| r.last_seen_at < (Time.now - Runner.timeout) }
-      missing_runners.each { |runner|
-        Job.all.find_all { |job| job.taken_by == runner }.each { |job| job.update(:taken_at => nil) }
-      }
+      missing_runners.each do |runner|
+        release_jobs = Job.all.find_all { |job| job.taken_by == runner && job.taken_at != nil }
+        release_jobs.each do |job|
+          job.update(:taken_at => nil)
+          job.build.logln "Runner <#{runner.hostname}> missing. job##{job.id} released."
+        end
+      end
     end
 
   end

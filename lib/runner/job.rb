@@ -62,10 +62,6 @@ module Testbot::Runner
       end
     end
 
-    def put_to_server output, body
-      Server.put("/jobs/#{@id}", body: {result: SafeResultText.clean(output)}.merge(body) )
-    end
-
     private
 
     def kill_processes
@@ -87,6 +83,10 @@ module Testbot::Runner
       put_to_server output, {status: "building"}
     rescue Timeout::Error
       puts "Got a timeout when posting an job result update. This can happen when the server is busy and is not a critical error."
+    end
+
+    def put_to_server output, body={}
+      Server.put("/jobs/#{@id}", body: {result: SafeResultText.clean(output)}.merge(body) )
     end
 
     def run_and_return_result(command)
