@@ -13,7 +13,7 @@ module Testbot::Server
       current_group, current_size = 0, 0
       tests_with_sizes.each do |test, size|
         # inserts into next group if current is full and we are not in the last group
-        if (0.5*size + current_size) > group_size(tests_with_sizes, group_count(instance_count, 0.5))
+        if (0.5*size + current_size) > group_size(tests_with_sizes, group_count(instance_count, initial_allocate_ratio))
           current_size = size
           current_group += 1
         else
@@ -27,6 +27,10 @@ module Testbot::Server
     end
 
     private
+
+    def self.initial_allocate_ratio
+      0.5
+    end
 
     def self.group_count(instance_count, initial_allocate_ratio=1.0)
       instance_count.to_f / initial_allocate_ratio.to_f

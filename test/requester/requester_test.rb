@@ -337,7 +337,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:print)
         flexmock(requester).should_receive(:puts)
 
-        flexmock(requester).should_receive('system').with("rsync -az --delete --delete-excluded -e ssh  . cruise@somewhere:/tmp/testbot/foo")
+        flexmock(requester).should_receive('system').with("rsync -az --timeout=300 --delete --delete-excluded -e ssh  . cruise@somewhere:/tmp/testbot/foo")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
