@@ -16,7 +16,8 @@
           var idle_instances = 0;
           var total_instances = 0;
           $.each(runners, function(i, runner) {
-            $("#runners").append("<li>" + runner.hostname + ": " + runner.idle_instances + " / " + runner.max_instances + " idle</li>");
+            $("#runners").append("<li>[" + runner.hostname + "] idle: " + runner.idle_instances + " / " + runner.max_instances
+              + " status: " + runner.status + "</li>");
             idle_instances += runner.idle_instances;
             total_instances += runner.max_instances;
           });

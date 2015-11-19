@@ -474,7 +474,7 @@ module Testbot::Server
         assert last_response.ok?
         assert_equal ([ { "version" => Testbot.version.to_s, "build" => nil, "hostname" => 'hostname1', "uid" => "00:01",
                           "idle_instances" => 2, "max_instances" => 4, "username" => 'testbot',
-                          "ip" => "127.0.0.1", "last_seen_at" => Runner.first.last_seen_at.to_s } ]),
+                          "ip" => "127.0.0.1", "last_seen_at" => Runner.first.last_seen_at.to_s, "status" => "" } ]),
                      JSON.parse(last_response.body)
       end
 

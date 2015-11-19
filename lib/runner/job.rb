@@ -30,7 +30,7 @@ module Testbot::Runner
         result += run_and_return_result("#{base_environment} #{adapter.command(@project, ruby_cmd, @files)}")
       end
 
-      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(result), :status => status, :time => run_time })
+      put_to_server result, {status: status, time: run_time}
       puts "Job #{@id} finished."
     end
 
@@ -38,6 +38,27 @@ module Testbot::Runner
       if @build_id == build_id && @pid
         kill_processes
         @killed = true
+      end
+    end
+
+    def fetch_code
+      put_to_server "", {status: "fetching-code (rsync)"}
+      system "rsync -az --timeout=300 --delete --delete-excluded -e ssh #{root}/ #{project}"
+    end
+
+    def before_run max_instances
+      put_to_server "", {status: "before-run"}
+      rvm_prefix = RubyEnv.rvm_prefix(project)
+      bundler_cmd = (RubyEnv.bundler?(project) ? [rvm_prefix, "bundle &&", rvm_prefix, "bundle exec"] : [rvm_prefix]).compact.join(" ")
+      command_prefix = "cd #{project} && export RAILS_ENV=test && export TEST_INSTANCES=#{max_instances} && #{bundler_cmd}"
+
+      if File.exists?("#{project}/lib/tasks/testbot.rake")
+        system "#{command_prefix} rake testbot:before_run"
+      elsif File.exists?("#{project}/config/testbot/before_run.rb")
+        system "#{command_prefix} ruby config/testbot/before_run.rb"
+      else
+        # workaround to bundle within the correct env
+        system "#{command_prefix} ruby -e ''"
       end
     end
 
@@ -59,9 +80,13 @@ module Testbot::Runner
     end
 
     def post_results(output)
-      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(output), :status => "building" })
+      put_to_server output, {status: "building"}
     rescue Timeout::Error
       puts "Got a timeout when posting an job result update. This can happen when the server is busy and is not a critical error."
+    end
+
+    def put_to_server output, body={}
+      Server.put("/jobs/#{@id}", body: {result: SafeResultText.clean(output)}.merge(body) )
     end
 
     def run_and_return_result(command)

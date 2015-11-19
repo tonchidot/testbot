@@ -26,9 +26,30 @@ module Testbot::Server
       end
     end
 
+    def all_jobs
+      Job.all.find_all { |j| j.build == self }
+    end
+
+    def done_jobs
+      Job.all.find_all { |j| j.done && j.build == self }
+    end
+
+    def remaining_jobs no_jruby=nil
+      Job.remaining_jobs(self.id, no_jruby)
+    end
+
     def destroy
-      Job.all.find_all { |j| j.build == self }.each { |job| job.destroy }
+      all_jobs.each { |job| job.destroy }
       super
+    end
+
+    def logln message
+      log "\n" if self.results[-1] != "\n"
+      log "#{message}\n"
+    end
+
+    def log message
+      self.results += message
     end
 
   end
